@@ -54,6 +54,14 @@
     { "name": "Meta Fund: WhatsApp Username as BSUID", "release_date": "2026-05-20", "rollout": "Phased rollout in progress", "note": "Meta-dependent — pre-release until globally available" },
     { "name": "Meta Fund: Partner-led Business Verification", "release_date": "2026-05-20", "rollout": "Phased rollout in progress", "note": "Meta-dependent — pre-release until globally available" }
   ],
+  "ga_released": [
+    { "name": "Raven Email AI Agent", "release_date": "2026-05-18" },
+    { "name": "TikTok Channel Integration: Comments", "release_date": "2026-05-11" },
+    { "name": "Meta Fund: Conversions API Data Sync", "release_date": "2026-05-11" },
+    { "name": "Broadcast Creation v2", "release_date": "2026-04-27" },
+    { "name": "Ecommerce Product Recommendation (Phase 1)", "release_date": "2026-04-22" },
+    { "name": "Inbox AI Agent Queue", "release_date": "2026-03-29" }
+  ],
   "gtm_readiness": [
     { "feature": "Billing v3",                  "docs": "urgent",  "gtm": "done",    "rollout": "n/a",     "global": "pending" },
     { "feature": "RBAC Direct URL Navigation",  "docs": "urgent",  "gtm": "done",    "rollout": "n/a",     "global": "pending" },
@@ -67,5 +75,5 @@
     { "feature": "DM AI Agent Typing Indicator","docs": "pending", "gtm": "done",    "rollout": "n/a",     "global": "n/a" },
     { "feature": "TikTok Channel Integration",  "docs": "done",    "gtm": "pending", "rollout": "n/a",     "global": "n/a" }
   ],
-  "methodology": "Risk and confidence are computed from Jira QA gates: weighted completion across work items (Released 1.0, Pre-release 0.95, QA-passed 0.85, in QA 0.6, code review 0.4, in progress 0.25, to do 0), minus penalties for past postponements and unstaged work close to the Thursday Rollout Gate. To ship, a release must be QA-passed on staging and approved at the Thursday Rollout Gate; the deployment team then pushes it live at the following Monday Release Rundown."
+  "methodology": "Risk and confidence are computed from Jira QA gates: weighted completion across work items (Released 1.0, Pre-release 0.95, QA-passed 0.85, in QA 0.6, code review 0.4, in progress 0.25, to do 0), minus penalties for past postponements and unstaged work close to the Thursday Rollout Gate. To ship, a release must be QA-passed on staging and approved at the Thursday Rollout Gate; the Sunday Release Rundown is the final go-no-go, and the deployment team pushes it live early the following Monday morning. Jira version state maps to rollout: unreleased = in progress, released = in beta / pre-release, archived = globally released (GA)."
 }

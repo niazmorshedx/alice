@@ -97,8 +97,10 @@ td .cellchip { font-size: 11.5px; font-weight: 650; padding: 2px 10px; border-ra
   <div id="cards" style="display:grid;gap:14px;"></div>
   <div class="section-h">GTM &amp; CS Readiness — will you get what you need on time?</div>
   <div style="overflow-x:auto;"><table id="gtmTable"><thead><tr><th>Feature</th><th>Release Docs</th><th>GTM Briefing</th><th>Phased Rollout</th><th>Global Release</th></tr></thead><tbody></tbody></table></div>
-  <div class="section-h">Recently Shipped</div>
+  <div class="section-h">In Beta / Phased Rollout (pre-release)</div>
   <div class="shipped" id="shipped"></div>
+  <div class="section-h">Globally Released (GA)</div>
+  <div class="shipped" id="gaReleased"></div>
   <div class="foot" id="methodology"></div>
 </div>
 <script>
@@ -180,6 +182,12 @@ function render(DATA) {
     ship += '<div class="ship"><div class="n">' + esc(s.name) + '</div><div class="d">Released ' + fmtDate(s.release_date) + " · " + esc(s.note) + '</div><div class="r">' + esc(s.rollout) + "</div></div>";
   });
   document.getElementById("shipped").innerHTML = ship;
+
+  var ga = "";
+  (DATA.ga_released || []).forEach(function(s) {
+    ga += '<div class="ship"><div class="n">' + esc(s.name) + '</div><div class="d">Globally released ' + fmtDate(s.release_date) + '</div><div class="r">\u2713 GA \u00b7 global</div></div>';
+  });
+  document.getElementById("gaReleased").innerHTML = ga;
 
   document.getElementById("methodology").innerHTML = "<strong>How to read this:</strong> " + esc(DATA.methodology) + " · This page is internal to MyAlice — please do not share the URL outside the company.";
 }
