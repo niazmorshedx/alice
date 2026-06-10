@@ -80,9 +80,23 @@ td .cellchip { font-size: 11.5px; font-weight: 650; padding: 2px 10px; border-ra
 .foot { font-size: 12px; color: var(--subtle); border-top: 1px solid var(--border); padding-top: 14px; line-height: 1.6; }
 .err { background: var(--red-bg); color: var(--red-tx); border-radius: 12px; padding: 14px 18px; font-weight: 600; display: none; }
 @media (max-width: 760px) { .hero, .facts { grid-template-columns: 1fr 1fr; } .shipped { grid-template-columns: 1fr; } }
+.kiosk-ctl { position: fixed; bottom: 18px; right: 18px; z-index: 60; display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-family: inherit; font-size: 12.5px; font-weight: 650; cursor: pointer; box-shadow: 0 3px 14px rgba(0,0,0,0.12); transition: border-color .15s, transform .15s, background .15s, color .15s; }
+.kiosk-ctl:hover { border-color: var(--accent); transform: translateY(-1px); }
+.kiosk-ctl .ico { width: 14px; height: 14px; display: inline-flex; }
+.kiosk-ctl .ico svg { width: 14px; height: 14px; fill: var(--accent); }
+.kiosk-ctl.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.kiosk-ctl.on .ico svg { fill: #fff; }
+.kiosk-ctl .hint { font-size: 11px; font-weight: 500; color: var(--subtle); }
+.kiosk-ctl.on .hint { color: rgba(255,255,255,0.85); }
+@media (max-width: 760px) { .kiosk-ctl .hint { display: none; } .kiosk-ctl { bottom: 14px; right: 14px; } }
 </style>
 </head>
 <body>
+<button class="kiosk-ctl" id="kioskBtn" type="button" aria-pressed="false" title="Auto-scroll — press F for fullscreen presentation mode">
+  <span class="ico" id="kioskIco"></span>
+  <span id="kioskLabel">Auto-scroll</span>
+  <span class="hint">· press F for fullscreen</span>
+</button>
 <div class="wrap">
   <div class="topbar">
     <div>
@@ -200,6 +214,74 @@ function load() {
 }
 load();
 setInterval(load, 300000);
+
+(function presentationMode() {
+  var PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11 -7z"></path></svg>';
+  var PAUSE = '<svg viewBox="0 0 24 24"><rect x="7" y="5" width="3.5" height="14" rx="1"></rect><rect x="13.5" y="5" width="3.5" height="14" rx="1"></rect></svg>';
+  var SPEED = 40, DWELL = 1200;
+  var scrolling = false, dir = 1, lastTs = null, dwellUntil = 0, acc = 0, rafId = null;
+  var btn = document.getElementById("kioskBtn");
+  var ico = document.getElementById("kioskIco");
+  var label = document.getElementById("kioskLabel");
+  function maxScroll() {
+    var hgt = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+    return Math.max(0, hgt - window.innerHeight);
+  }
+  function paint() {
+    if (scrolling) { btn.classList.add("on"); label.textContent = "Stop auto-scroll"; ico.innerHTML = PAUSE; btn.setAttribute("aria-pressed", "true"); }
+    else { btn.classList.remove("on"); label.textContent = "Auto-scroll"; ico.innerHTML = PLAY; btn.setAttribute("aria-pressed", "false"); }
+  }
+  function step(ts) {
+    if (!scrolling) { rafId = null; return; }
+    rafId = requestAnimationFrame(step);
+    if (lastTs === null) lastTs = ts;
+    var dt = (ts - lastTs) / 1000; lastTs = ts;
+    if (ts < dwellUntil) return;
+    var mx = maxScroll();
+    if (mx <= 0) return;
+    acc += dir * SPEED * dt;
+    var mv = (acc < 0) ? Math.ceil(acc) : Math.floor(acc);
+    if (mv !== 0) { acc -= mv; window.scrollBy(0, mv); }
+    var y = window.scrollY || window.pageYOffset || 0;
+    if (dir === 1 && y >= mx - 1) { window.scrollTo(0, mx); dir = -1; dwellUntil = ts + DWELL; acc = 0; }
+    else if (dir === -1 && y <= 0) { window.scrollTo(0, 0); dir = 1; dwellUntil = ts + DWELL; acc = 0; }
+  }
+  function start() {
+    if (scrolling) return;
+    scrolling = true; lastTs = null; dwellUntil = 0; acc = 0;
+    var y = window.scrollY || window.pageYOffset || 0;
+    dir = (y >= maxScroll() - 1) ? -1 : 1;
+    paint();
+    if (!rafId) rafId = requestAnimationFrame(step);
+  }
+  function stop() { scrolling = false; paint(); }
+  function toggleScroll() { if (scrolling) stop(); else start(); }
+  function inFs() { return document.fullscreenElement || document.webkitFullscreenElement; }
+  function enterFs() {
+    var el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  }
+  function exitFs() {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  }
+  btn.addEventListener("click", toggleScroll);
+  document.addEventListener("keydown", function(e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var t = e.target || {};
+    if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable) return;
+    if (e.key === "f" || e.key === "F") {
+      e.preventDefault();
+      if (!inFs()) { enterFs(); start(); }
+      else { exitFs(); }
+    }
+  });
+  function onFsChange() { if (!inFs()) stop(); }
+  document.addEventListener("fullscreenchange", onFsChange);
+  document.addEventListener("webkitfullscreenchange", onFsChange);
+  paint();
+})();
 </script>
 </body>
 </html>
