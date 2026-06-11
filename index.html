@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>MyAlice — Release Status</title>
+<title>Alice — Release Status</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -32,6 +32,7 @@ body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", syst
 .topbar h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
 .topbar h1 span { color: var(--accent); }
 .topbar .meta { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+#gateMeta { text-align: right; }
 .hero { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .hero .cell { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
 .hero .cell .k { font-size: 11px; font-weight: 650; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
@@ -80,51 +81,237 @@ td .cellchip { font-size: 11.5px; font-weight: 650; padding: 2px 10px; border-ra
 .ship .n { font-weight: 650; font-size: 14px; }
 .ship .d { font-size: 12px; color: var(--subtle); margin-top: 2px; }
 .ship .r { font-size: 12px; color: var(--green-tx); background: var(--green-bg); display: inline-block; padding: 2px 10px; border-radius: 9px; margin-top: 7px; font-weight: 600; }
+.sig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 860px) { .sig-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .sig-grid { grid-template-columns: 1fr; } }
+.sig-card { background: var(--card); border: 1px solid var(--border); border-top: 3px solid var(--border); border-radius: 14px; padding: 13px 15px; display: grid; gap: 7px; align-content: start; cursor: default; }
+.sig-card.red { border-top-color: var(--red); }
+.sig-card.amber { border-top-color: var(--amber); }
+.sig-card.green { border-top-color: var(--green); }
+.sig-card.info { border-top-color: var(--subtle); }
+.sig-rel { font-size: 11px; font-weight: 650; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sig-verdict-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sig-verdict { font-size: 21px; font-weight: 800; letter-spacing: -0.3px; line-height: 1.1; }
+.sig-verdict.red { color: var(--red); }
+.sig-verdict.amber { color: var(--amber); }
+.sig-verdict.green { color: var(--green); }
+.sig-verdict.info { color: var(--muted); }
+.sig-dots { display: flex; gap: 5px; flex-shrink: 0; }
+.sig-dots span { width: 9px; height: 9px; border-radius: 50%; }
+.sig-dots .red { background: var(--red); }
+.sig-dots .amber { background: var(--amber); }
+.sig-dots .green { background: var(--green); }
+.sig-dots .info { background: var(--subtle); }
+.sig-head { font-size: 13.5px; font-weight: 650; line-height: 1.35; min-height: 36px; }
+.sig-src { font-size: 10.5px; color: var(--subtle); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sig-src a { color: var(--subtle); text-decoration: underline; }
+.sig-meta { font-size: 12px; color: var(--subtle); line-height: 1.6; }
 .foot { font-size: 12px; color: var(--subtle); border-top: 1px solid var(--border); padding-top: 14px; line-height: 1.6; }
 .err { background: var(--red-bg); color: var(--red-tx); border-radius: 12px; padding: 14px 18px; font-weight: 600; display: none; }
 @media (max-width: 760px) { .hero, .facts { grid-template-columns: 1fr 1fr; } .shipped { grid-template-columns: 1fr; } }
-.kiosk-ctl { position: fixed; bottom: 18px; right: 18px; z-index: 60; display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-family: inherit; font-size: 12.5px; font-weight: 650; cursor: pointer; box-shadow: 0 3px 14px rgba(0,0,0,0.12); transition: border-color .15s, transform .15s, background .15s, color .15s; }
+#tvStrip { display: none; }
+#paneDots { display: none; }
+.pane { display: contents; }
+body.tv { height: 100vh; overflow: hidden; padding: 20px 26px 14px; }
+body.tv .wrap { max-width: none; height: 100%; display: flex; flex-direction: column; gap: 14px; }
+body.tv .topbar, body.tv #hero { display: none; }
+.foot .foot-short { display: none; }
+body.tv .foot .foot-full { display: none; }
+body.tv .foot .foot-short { display: inline; }
+body.tv #tvStrip { display: grid; grid-template-columns: 300px auto 1fr; gap: 22px; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
+#tvStrip .t-title { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+#tvStrip .t-title span { color: var(--accent); }
+#tvStrip .live-clock { font-size: 13.5px; }
+.t-kpis { display: flex; gap: 12px; }
+.t-kpi { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 10px 22px; text-align: center; }
+.t-kpi .v { font-size: 34px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.t-kpi .v.red { color: var(--red); } .t-kpi .v.amber { color: var(--amber); } .t-kpi .v.green { color: var(--green); }
+.t-kpi .k { font-size: 10.5px; font-weight: 650; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.t-flags { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; align-content: center; min-width: 0; }
+.t-flag { font-size: 13.5px; font-weight: 650; border-radius: 999px; padding: 5px 16px; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.t-flag.c0 { background: #fbeae6; color: #9c3015; }
+.t-flag.c1 { background: #fdf0dc; color: #8a4a06; }
+.t-flag.c2 { background: #ece9fb; color: #54409e; }
+.t-flag.c3 { background: #e1f1ee; color: #11635a; }
+.t-flag.c4 { background: #e7edfa; color: #2a4d9e; }
+.t-flag.ok { background: var(--green-bg); color: var(--green-tx); }
+@media (prefers-color-scheme: dark) {
+  .t-flag.c0 { background: #3d231d; color: #efa28e; }
+  .t-flag.c1 { background: #3c2f17; color: #f0c581; }
+  .t-flag.c2 { background: #2a2440; color: #c2b5ee; }
+  .t-flag.c3 { background: #1d3531; color: #8cd5ca; }
+  .t-flag.c4 { background: #1f2a40; color: #9db8ea; }
+}
+body.tv .pane { display: none; }
+body.tv .pane.active { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; overflow: hidden; }
+body.tv #paneDots { display: flex; justify-content: center; gap: 9px; padding: 4px 0 0; }
+#paneDots span { width: 10px; height: 10px; border-radius: 50%; background: var(--track); cursor: pointer; border: 1px solid var(--border); }
+#paneDots span.on { background: var(--accent); border-color: var(--accent); }
+body.tv .section-h { font-size: 15px; }
+body.tv #cards { grid-template-columns: repeat(3, 1fr); align-items: start; }
+body.tv .facts { grid-template-columns: repeat(2, 1fr); }
+body.tv .rel-head .name { font-size: 20px; }
+body.tv .rel-head .desc { font-size: 13.5px; }
+body.tv .sig-verdict { font-size: 27px; }
+body.tv .sig-rel { font-size: 12.5px; }
+body.tv .sig-head { font-size: 16.5px; min-height: 0; }
+body.tv .sig-src { font-size: 12px; }
+body.tv th, body.tv td { font-size: 13.5px; padding: 8px 15px; }
+body.tv td .cellchip { font-size: 11.5px; padding: 2px 9px; }
+body.tv #pane3 > div { overflow: hidden; }
+body.tv .shipped { grid-template-columns: repeat(3, 1fr); }
+.live-row { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+.live-dot { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.live-dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--green); animation: ripple 1.6s ease-out infinite; }
+@keyframes ripple { 0% { transform: scale(1); opacity: 0.55; } 100% { transform: scale(3.2); opacity: 0; } }
+.live-tag { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; color: var(--green); }
+.live-clock { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.mrr-slot-tv { display: none; }
+body.tv .mrr-slot-tv { display: block; margin-top: auto; }
+body.tv .mrr-slot-desktop { display: none; }
+.mrr-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.mrr-label { font-size: 11.5px; font-weight: 650; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+.mrr-label strong { color: var(--accent); }
+.mrr-days { font-size: 64px; font-weight: 800; line-height: 1.05; letter-spacing: -1.5px; font-variant-numeric: tabular-nums; }
+body.tv .mrr-days { font-size: 72px; }
+body.tv .mrr-card { padding: 12px 20px; }
+.mrr-sub { font-size: 12px; color: var(--subtle); }
+.mrr-score { display: inline-block; font-weight: 800; font-size: 11.5px; padding: 2px 11px; border-radius: 999px; margin-left: 4px; font-variant-numeric: tabular-nums; }
+.mrr-score.red { background: var(--red-bg); color: var(--red-tx); }
+.mrr-score.amber { background: var(--amber-bg); color: var(--amber-tx); }
+.mrr-score.green { background: var(--green-bg); color: var(--green-tx); }
+.mrr-inds { display: flex; gap: 28px; align-items: flex-end; flex-wrap: wrap; }
+.mrr-ind { display: grid; justify-items: center; gap: 6px; }
+.mrr-ind-l { font-size: 10.5px; font-weight: 650; color: var(--subtle); }
+.gauge { position: relative; width: 110px; height: 58px; overflow: hidden; }
+.gauge .arc { position: absolute; top: 3px; left: 0; width: 110px; height: 110px; border-radius: 50%; background: conic-gradient(from 270deg, var(--red) 0deg 60deg, var(--amber) 60deg 120deg, var(--green) 120deg 180deg, transparent 180deg 360deg); -webkit-mask: radial-gradient(circle, transparent 0 36px, #000 37px); mask: radial-gradient(circle, transparent 0 36px, #000 37px); }
+.gauge .needle { position: absolute; left: 53.5px; bottom: 0; width: 3px; height: 44px; background: var(--text); border-radius: 2px; transform-origin: bottom center; }
+.gauge .hub { position: absolute; left: 49px; bottom: -5px; width: 12px; height: 12px; border-radius: 50%; background: var(--text); }
+.glide { width: 110px; height: 56px; }
+.orbwrap, .battwrap { width: 110px; height: 56px; display: flex; align-items: center; justify-content: center; }
+.orb { position: relative; width: 30px; height: 30px; border-radius: 50%; }
+.orb.green { background: var(--green); } .orb.amber { background: var(--amber); } .orb.red { background: var(--red); }
+.orb::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: inherit; animation: ripple 1.4s ease-out infinite; }
+.orb.green::after { animation-duration: 2.4s; }
+.orb.amber::after { animation-duration: 1.4s; }
+.orb.red::after { animation-duration: 0.7s; }
+.batt { display: flex; gap: 3px; border: 2px solid var(--subtle); border-radius: 6px; padding: 3px; position: relative; }
+.batt::after { content: ""; position: absolute; right: -7px; top: 50%; transform: translateY(-50%); width: 4px; height: 12px; background: var(--subtle); border-radius: 0 2px 2px 0; }
+.seg { width: 13px; height: 20px; border-radius: 3px; background: var(--track); }
+.seg.fill.red { background: var(--red); } .seg.fill.amber { background: var(--amber); } .seg.fill.green { background: var(--green); }
+#lock { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.lock-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 34px 38px; display: grid; gap: 12px; width: 320px; }
+.lock-title { font-size: 20px; font-weight: 800; }
+.lock-title span { color: var(--accent); }
+.lock-sub { font-size: 13px; color: var(--muted); }
+#lockInput { background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 10px 14px; color: var(--text); font-size: 14px; font-family: inherit; outline: none; }
+#lockInput:focus { border-color: var(--accent); }
+#lockBtn { background: var(--accent); color: #fff; border: none; border-radius: 9px; padding: 10px 14px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+#lockBtn:hover { filter: brightness(1.08); }
+.lock-err { display: none; font-size: 12.5px; color: var(--red-tx); background: var(--red-bg); border-radius: 8px; padding: 6px 12px; }
+body.locked .wrap, body.locked .kiosk-wrap { display: none; }
+.kiosk-wrap { position: fixed; bottom: 18px; right: 18px; z-index: 60; display: flex; gap: 8px; }
+.kiosk-ctl { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-family: inherit; font-size: 12.5px; font-weight: 650; cursor: pointer; box-shadow: 0 3px 14px rgba(0,0,0,0.12); transition: border-color .15s, transform .15s, background .15s, color .15s; }
 .kiosk-ctl:hover { border-color: var(--accent); transform: translateY(-1px); }
 .kiosk-ctl .ico { width: 14px; height: 14px; display: inline-flex; }
-.kiosk-ctl .ico svg { width: 14px; height: 14px; fill: var(--accent); }
+.kiosk-ctl .ico svg { width: 14px; height: 14px; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .kiosk-ctl.on { background: var(--accent); color: #fff; border-color: var(--accent); }
-.kiosk-ctl.on .ico svg { fill: #fff; }
+.kiosk-ctl.on .ico svg { stroke: #fff; }
 .kiosk-ctl .hint { font-size: 11px; font-weight: 500; color: var(--subtle); }
 .kiosk-ctl.on .hint { color: rgba(255,255,255,0.85); }
-@media (max-width: 760px) { .kiosk-ctl .hint { display: none; } .kiosk-ctl { bottom: 14px; right: 14px; } }
+.kiosk-ctl .kbd { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 11px; font-weight: 700; background: var(--track); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; color: var(--accent); }
+.kiosk-ctl.on .kbd { background: rgba(255,255,255,0.18); border-color: transparent; color: #fff; }
+body.tv #scrollBtn { display: none; }
+@media (max-width: 760px) { .kiosk-ctl .hint { display: none; } .kiosk-wrap { bottom: 14px; right: 14px; } }
 </style>
 </head>
-<body>
-<button class="kiosk-ctl" id="kioskBtn" type="button" aria-pressed="false" title="Auto-scroll — press F for fullscreen presentation mode">
-  <span class="ico" id="kioskIco"></span>
-  <span id="kioskLabel">Auto-scroll</span>
-  <span class="hint">· press F for fullscreen</span>
+<body class="locked">
+<div id="lock">
+  <div class="lock-card">
+    <div class="lock-title">Alice — <span>Release Status</span></div>
+    <div class="lock-sub">Enter the passkey to view this dashboard.</div>
+    <input type="password" id="lockInput" placeholder="Passkey" autocomplete="off" autofocus>
+    <button id="lockBtn" type="button">Unlock</button>
+    <div class="lock-err" id="lockErr">Wrong passkey — try again.</div>
+  </div>
+</div>
+<div class="kiosk-wrap">
+<button class="kiosk-ctl" id="scrollBtn" type="button" aria-pressed="false" title="Auto-scroll the page up and down — press S to start/stop">
+  <span class="ico" id="scrollIco"></span>
+  <span id="scrollLabel">Scroll</span>
+  <span class="hint"><code class="kbd">S</code></span>
 </button>
+<button class="kiosk-ctl" id="kioskBtn" type="button" aria-pressed="false" title="TV mode — fullscreen, no scrolling, panes rotate every 15s. Press F.">
+  <span class="ico" id="kioskIco"></span>
+  <span id="kioskLabel">TV</span>
+  <span class="hint" id="kioskHint"><code class="kbd">F</code></span>
+</button>
+</div>
 <div class="wrap">
+  <div id="tvStrip">
+    <div><div class="t-title">Alice — <span>Release Status</span></div><div class="live-row"><span class="live-dot"></span><span class="live-tag">LIVE</span><span class="live-clock" id="tvClock">—</span></div></div>
+    <div class="t-kpis">
+      <div class="t-kpi"><div class="v" id="tvGate">—</div><div class="k">Next gate</div></div>
+      <div class="t-kpi"><div class="v red" id="tvMissed">—</div><div class="k">Missed</div></div>
+      <div class="t-kpi"><div class="v amber" id="tvRisk">—</div><div class="k">At risk</div></div>
+      <div class="t-kpi"><div class="v green" id="tvTrack">—</div><div class="k">On track</div></div>
+    </div>
+    <div class="t-flags" id="tvFlags"></div>
+  </div>
   <div class="topbar">
     <div>
-      <h1>MyAlice — <span>Release Status</span></h1>
+      <h1>Alice — <span>Release Status</span></h1>
       <div class="meta">Single source of truth for upcoming releases · refreshed by Product · last updated <strong id="updatedAt">…</strong></div>
+      <div class="live-row"><span class="live-dot"></span><span class="live-tag">LIVE</span><span class="live-clock" id="topClock">—</span></div>
     </div>
     <div class="meta" id="gateMeta"></div>
   </div>
   <div class="err" id="loadErr">Could not load release data — check back shortly.</div>
   <div class="hero" id="hero"></div>
+  <div class="mrr-slot mrr-slot-desktop"></div>
+  <div class="pane" id="pane1">
   <div class="section-h">Upcoming Releases</div>
   <div id="cards" style="display:grid;gap:14px;"></div>
+  <div class="mrr-slot mrr-slot-tv"></div>
+  </div>
+  <div class="pane" id="pane2">
+  <div class="section-h">Field Signals <span style="text-transform:none;letter-spacing:0;font-weight:600;color:var(--subtle);">(Slack sweep — human signals, display-only)</span></div>
+  <div id="signals" class="sig-grid"></div>
+  <div class="sig-meta" id="signalsMeta"></div>
+  <div class="mrr-slot mrr-slot-tv"></div>
+  </div>
+  <div class="pane" id="pane3">
   <div class="section-h">Release Pipeline — Stage Status <span style="text-transform:none;letter-spacing:0;font-weight:600;color:var(--subtle);">(GTM / CS readiness)</span></div>
   <div style="overflow-x:auto;"><table id="boardTable"><thead><tr><th>Release Item</th><th>Handoff</th><th>Beta&nbsp;FB</th><th>Phased</th><th>GTM</th><th>Docs</th><th>Global</th><th>Retro</th></tr></thead><tbody></tbody></table></div>
+  <div class="mrr-slot mrr-slot-tv"></div>
+  </div>
+  <div class="pane" id="pane4">
   <div class="section-h">In Beta / Phased Rollout (pre-release)</div>
   <div class="shipped" id="shipped"></div>
   <div class="section-h">Globally Released (GA)</div>
   <div class="shipped" id="gaReleased"></div>
-  <div class="foot" id="methodology"></div>
+    <div class="foot" id="methodology"></div>
+    <div class="mrr-slot mrr-slot-tv"></div>
+  </div>
+  <div id="paneDots"></div>
 </div>
 <script>
 function dayDiff(dateStr) {
   var d = new Date(dateStr + "T00:00:00");
   var now = new Date(); now.setHours(0,0,0,0);
   return Math.round((d.getTime() - now.getTime()) / 86400000);
+}
+function gateDays() {
+  var d = new Date(); d.setHours(0, 0, 0, 0);
+  return (4 - d.getDay() + 7) % 7;
+}
+function gateDateObj() {
+  var d = new Date(); d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + gateDays());
+  return d;
+}
+function fmtDateObj(d) {
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 function fmtDate(s) {
   var d = new Date(s + "T00:00:00");
@@ -137,8 +324,9 @@ function render(DATA) {
   var staleDays = -dayDiff(DATA.generated_at);
   if (staleDays > 3) document.getElementById("updatedAt").textContent = DATA.generated_at + " (" + staleDays + "d ago)";
 
-  var gateIn = dayDiff(DATA.next_gate.date);
-  document.getElementById("gateMeta").innerHTML = "Next QA gate: <strong>" + fmtDate(DATA.next_gate.date) + "</strong> (" + DATA.next_gate.label + ") — " + (gateIn >= 0 ? "in " + gateIn + " day" + (gateIn === 1 ? "" : "s") : "passed");
+  var gateIn = gateDays();
+  var gateD = gateDateObj();
+  document.getElementById("gateMeta").innerHTML = "Next QA gate: <strong>" + fmtDateObj(gateD) + "</strong><br>" + esc(DATA.next_gate.label);
 
   var up = DATA.releases_upcoming;
   var missed = up.filter(function(r){ return r.risk === "missed" || r.risk === "failing"; }).length;
@@ -147,7 +335,7 @@ function render(DATA) {
   var gtmIdx = DATA.pipeline_board.stages.indexOf("GTM Briefing");
   var gtmPending = DATA.pipeline_board.items.filter(function(it){ return it.cells[gtmIdx] === "pending"; }).length;
   var heroHtml = "";
-  heroHtml += '<div class="cell"><div class="k">Next QA gate</div><div class="v">' + fmtDate(DATA.next_gate.date) + '</div><div class="s">' + (gateIn >= 0 ? "T−" + gateIn + " days · " : "") + esc(DATA.next_gate.label) + "</div></div>";
+  heroHtml += '<div class="cell"><div class="k">Next QA gate</div><div class="v">' + fmtDateObj(gateD) + '</div><div class="s">' + "T−" + gateIn + "d · " + esc(DATA.next_gate.label) + "</div></div>";
   heroHtml += '<div class="cell"><div class="k">Upcoming releases</div><div class="v">' + up.length + '</div><div class="s">' + missed + " missed · " + atRisk + " at risk · " + onTrack + " on track</div></div>";
   heroHtml += '<div class="cell"><div class="k">GTM / CS attention</div><div class="v">' + gtmPending + '</div><div class="s">GTM briefings pending</div></div>';
   document.getElementById("hero").innerHTML = heroHtml;
@@ -207,7 +395,129 @@ function render(DATA) {
   });
   document.getElementById("gaReleased").innerHTML = ga;
 
-  document.getElementById("methodology").innerHTML = "<strong>How to read this:</strong> " + esc(DATA.methodology) + " · This page is internal to MyAlice — please do not share the URL outside the company.";
+  var footFull = "<strong>How to read this:</strong> " + esc(DATA.methodology) + " \u00b7 This page is internal to Alice — please do not share the URL outside the company.";
+  var footShort = "<strong>How to read this:</strong> " + esc(DATA.methodology_short || DATA.methodology) + " \u00b7 Internal to Alice — do not share.";
+  document.getElementById("methodology").innerHTML = '<span class="foot-full">' + footFull + '</span><span class="foot-short">' + footShort + "</span>";
+  window.__data = DATA;
+  renderStrip();
+}
+
+function renderSignals(S) {
+  var rank = { red: 3, amber: 2, green: 1, info: 0 };
+  var verdictMap = { red: "RED FLAG", amber: "WATCH", green: "ON TARGET", info: "NOTE" };
+  function escAttr(s) { return esc(s).replace(/"/g, "&quot;"); }
+  var html = "";
+  S.releases.forEach(function(rel) {
+    var sigs = (rel.signals || []).slice();
+    if (sigs.length === 0) return;
+    sigs.sort(function(a, b) { return (rank[b.level] || 0) - (rank[a.level] || 0); });
+    var top = sigs[0];
+    var worst = top.level || "info";
+    var dots = "";
+    var tip = "";
+    sigs.forEach(function(sig) {
+      dots += '<span class="' + (sig.level || "info") + '"></span>';
+      tip += "[" + (sig.level || "info").toUpperCase() + "] " + sig.text + " — " + (sig.source && sig.source.who ? sig.source.who : "") + "\n\n";
+    });
+    var src_ = top.source || {};
+    var chan = String(src_.where || "");
+    var srcLine = esc(src_.who || "") + " \u00b7 " + esc(chan) + (src_.date_label ? " \u00b7 " + esc(src_.date_label) : "");
+    if (src_.permalink) srcLine += ' <a href="' + src_.permalink + '" target="_blank" rel="noopener">\u2197</a>';
+    var more = sigs.length > 1 ? " \u00b7 +" + (sigs.length - 1) + " more" : "";
+    html += '<div class="sig-card ' + worst + '" title="' + escAttr(tip.trim()) + '">' +
+            '<div class="sig-rel">' + esc(rel.release) + "</div>" +
+            '<div class="sig-verdict-row"><div class="sig-verdict ' + worst + '">' + verdictMap[worst] + "</div>" +
+            '<div class="sig-dots">' + dots + "</div></div>" +
+            '<div class="sig-head">' + esc(top.headline || top.text) + esc(more) + "</div>" +
+            '<div class="sig-src">' + srcLine + "</div></div>";
+  });
+  document.getElementById("signals").innerHTML = html;
+  window.__signals = S;
+  renderStrip();
+  document.getElementById("signalsMeta").innerHTML = "Swept <strong>" + esc(S.window_label) + "</strong> \u00b7 hover a card for full detail \u00b7 paraphrased, display-only \u00b7 sweeps every ~6h cover only the window since the last sweep.";
+}
+
+function loadSignals() {
+  fetch("signals.json?v=" + Date.now())
+    .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(function(s) { renderSignals(s); })
+    .catch(function() {
+      document.getElementById("signalsMeta").textContent = "Field signals unavailable \u2014 signals.json could not be loaded.";
+    });
+}
+
+function renderStrip() {
+  var D = window.__data;
+  if (D) {
+    var gIn = gateDays();
+    document.getElementById("tvGate").textContent = gIn >= 0 ? "T\u2212" + gIn + "d" : fmtDate(D.next_gate.date);
+    var up = D.releases_upcoming;
+    document.getElementById("tvMissed").textContent = up.filter(function(r){ return r.risk === "missed" || r.risk === "failing"; }).length;
+    document.getElementById("tvRisk").textContent = up.filter(function(r){ return r.risk === "at_risk"; }).length;
+    document.getElementById("tvTrack").textContent = up.filter(function(r){ return r.risk === "on_track"; }).length;
+  }
+  var S = window.__signals;
+  if (S) {
+    var flags = [];
+    S.releases.forEach(function(rel) {
+      (rel.signals || []).forEach(function(sig) {
+        if (sig.level === "red" && flags.length < 4) flags.push(esc(rel.release) + " \u2014 " + esc(sig.headline || sig.text));
+      });
+    });
+    var fhtml = "";
+    if (flags.length === 0) fhtml = '<div class="t-flag ok">No red flags in the last sweep</div>';
+    else flags.forEach(function(f, i) { fhtml += '<div class="t-flag c' + (i % 5) + '">' + f + "</div>"; });
+    document.getElementById("tvFlags").innerHTML = fhtml;
+  }
+  renderMrr();
+}
+
+function healthScore() {
+  var D = window.__data;
+  if (!D || !D.releases_upcoming || D.releases_upcoming.length === 0) return null;
+  var sum = 0, pen = 0;
+  D.releases_upcoming.forEach(function(r) {
+    if (r.risk === "missed" || r.risk === "failing") {
+      if (r.confidence === null || r.confidence === undefined) pen += 10;
+    } else if (r.risk === "at_risk") sum += 50;
+    else if (r.risk === "on_track") sum += 100;
+    else sum += 60;
+    if (r.slippage && r.slippage.postponements) pen += 2 * r.slippage.postponements;
+  });
+  var base = sum / D.releases_upcoming.length;
+  return Math.max(0, Math.min(100, Math.round(base - pen)));
+}
+
+function renderMrr() {
+  var slots = document.querySelectorAll(".mrr-slot");
+  if (!slots.length) return;
+  var days = dayDiff("2026-12-31");
+  var sc = healthScore();
+  var band = sc === null ? "amber" : (sc >= 70 ? "green" : (sc >= 40 ? "amber" : "red"));
+  var bandVar = band === "green" ? "var(--green)" : (band === "amber" ? "var(--amber)" : "var(--red)");
+  var needleDeg = (sc === null ? 50 : sc) * 1.8 - 90;
+  var yStart = new Date("2026-01-01T00:00:00").getTime();
+  var yEnd = new Date("2026-12-31T00:00:00").getTime();
+  var fx = Math.min(1, Math.max(0, (Date.now() - yStart) / (yEnd - yStart)));
+  var dotX = 8 + fx * 94;
+  var dotY = 52 - ((sc === null ? 50 : sc) / 100) * 44;
+  var fills = sc === null ? 0 : Math.max(0, Math.round(sc / 20));
+  var segs = "";
+  for (var i = 0; i < 5; i++) segs += '<span class="seg' + (i < fills ? " fill " + band : "") + '"></span>';
+  var html = '<div class="mrr-card">' +
+    '<div class="mrr-left">' +
+      '<div class="mrr-label">Company target · <strong>$200K MRR</strong> · by Dec 31, 2026</div>' +
+      '<div class="mrr-days">' + days + '</div>' +
+      '<div class="mrr-sub">days remaining · release-health score <span class="mrr-score ' + band + '">' + (sc === null ? "\u2014" : sc) + ' / 100</span></div>' +
+    '</div>' +
+    '<div class="mrr-inds">' +
+      '<div class="mrr-ind"><div class="gauge"><div class="arc"></div><div class="needle" style="transform: rotate(' + needleDeg + 'deg);"></div><div class="hub"></div></div></div>' +
+      '<div class="mrr-ind"><svg class="glide" viewBox="0 0 110 56"><line x1="8" y1="52" x2="102" y2="52" stroke="var(--border)" stroke-width="1"></line><line x1="8" y1="52" x2="102" y2="8" stroke="var(--subtle)" stroke-width="1.5" stroke-dasharray="4 3"></line><circle cx="' + dotX + '" cy="' + dotY + '" r="5" fill="' + bandVar + '"></circle></svg></div>' +
+      '<div class="mrr-ind"><div class="orbwrap"><div class="orb ' + band + '"></div></div></div>' +
+      '<div class="mrr-ind"><div class="battwrap"><div class="batt">' + segs + '</div></div></div>' +
+    '</div>' +
+  '</div>';
+  for (var j = 0; j < slots.length; j++) slots[j].innerHTML = html;
 }
 
 function load() {
@@ -216,24 +526,87 @@ function load() {
     .then(function(d) { document.getElementById("loadErr").style.display = "none"; render(d); })
     .catch(function() { document.getElementById("loadErr").style.display = "block"; });
 }
-load();
-setInterval(load, 300000);
+var AUTH_HASH = "cfc15868023cf5b8d5b600964f20f484248c5494348f62037322d095da0c9cf0";
+var booted = false;
+function startApp() {
+  if (booted) return;
+  booted = true;
+  document.body.classList.remove("locked");
+  document.getElementById("lock").style.display = "none";
+  load();
+  setInterval(load, 300000);
+  loadSignals();
+  setInterval(loadSignals, 300000);
+}
+function sha256hex(str) {
+  var enc = new TextEncoder().encode(str);
+  return crypto.subtle.digest("SHA-256", enc).then(function(buf) {
+    var a = new Uint8Array(buf), s = "";
+    for (var i = 0; i < a.length; i++) s += (a[i] < 16 ? "0" : "") + a[i].toString(16);
+    return s;
+  });
+}
+(function lockGate() {
+  var saved = null;
+  try { saved = localStorage.getItem("rsd_auth"); } catch (e) {}
+  if (saved === AUTH_HASH) { startApp(); return; }
+  var input = document.getElementById("lockInput");
+  var btn = document.getElementById("lockBtn");
+  var err = document.getElementById("lockErr");
+  function attempt() {
+    var v = input.value;
+    if (!v) return;
+    sha256hex(v).then(function(h) {
+      if (h === AUTH_HASH) {
+        try { localStorage.setItem("rsd_auth", h); } catch (e) {}
+        startApp();
+      } else {
+        err.style.display = "block";
+        input.value = "";
+        input.focus();
+      }
+    });
+  }
+  btn.addEventListener("click", attempt);
+  input.addEventListener("keydown", function(e) { if (e.key === "Enter") attempt(); });
+  input.focus();
+})();
 
-(function presentationMode() {
-  var PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11 -7z"></path></svg>';
-  var PAUSE = '<svg viewBox="0 0 24 24"><rect x="7" y="5" width="3.5" height="14" rx="1"></rect><rect x="13.5" y="5" width="3.5" height="14" rx="1"></rect></svg>';
+(function liveClock() {
+  var WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  var MO = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function p2(n) { return (n < 10 ? "0" : "") + n; }
+  function p3(n) { return (n < 100 ? (n < 10 ? "00" : "0") : "") + n; }
+  function tick() {
+    var d = new Date();
+    var h = d.getHours();
+    var ampm = h >= 12 ? "PM" : "AM";
+    var h12 = h % 12; if (h12 === 0) h12 = 12;
+    var str = WD[d.getDay()] + ", " + MO[d.getMonth()] + " " + d.getDate() + " \u00b7 " + p2(h12) + ":" + p2(d.getMinutes()) + ":" + p2(d.getSeconds()) + "." + p3(d.getMilliseconds()) + " " + ampm;
+    var a = document.getElementById("tvClock");
+    if (a) a.textContent = str;
+    var b = document.getElementById("topClock");
+    if (b) b.textContent = str;
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+
+(function autoScroll() {
   var SPEED = 40, DWELL = 1200;
   var scrolling = false, dir = 1, lastTs = null, dwellUntil = 0, acc = 0, rafId = null;
-  var btn = document.getElementById("kioskBtn");
-  var ico = document.getElementById("kioskIco");
-  var label = document.getElementById("kioskLabel");
+  var btn = document.getElementById("scrollBtn");
+  var ico = document.getElementById("scrollIco");
+  var label = document.getElementById("scrollLabel");
+  var ARROWS = '<svg viewBox="0 0 24 24"><path d="M8 7l4 -4l4 4"></path><path d="M8 17l4 4l4 -4"></path><path d="M12 3v18"></path></svg>';
+  ico.innerHTML = ARROWS;
   function maxScroll() {
     var hgt = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
     return Math.max(0, hgt - window.innerHeight);
   }
   function paint() {
-    if (scrolling) { btn.classList.add("on"); label.textContent = "Stop auto-scroll"; ico.innerHTML = PAUSE; btn.setAttribute("aria-pressed", "true"); }
-    else { btn.classList.remove("on"); label.textContent = "Auto-scroll"; ico.innerHTML = PLAY; btn.setAttribute("aria-pressed", "false"); }
+    if (scrolling) { btn.classList.add("on"); label.textContent = "Stop scroll"; btn.setAttribute("aria-pressed", "true"); }
+    else { btn.classList.remove("on"); label.textContent = "Scroll"; btn.setAttribute("aria-pressed", "false"); }
   }
   function step(ts) {
     if (!scrolling) { rafId = null; return; }
@@ -251,7 +624,7 @@ setInterval(load, 300000);
     else if (dir === -1 && y <= 0) { window.scrollTo(0, 0); dir = 1; dwellUntil = ts + DWELL; acc = 0; }
   }
   function start() {
-    if (scrolling) return;
+    if (scrolling || document.body.classList.contains("tv")) return;
     scrolling = true; lastTs = null; dwellUntil = 0; acc = 0;
     var y = window.scrollY || window.pageYOffset || 0;
     dir = (y >= maxScroll() - 1) ? -1 : 1;
@@ -259,8 +632,71 @@ setInterval(load, 300000);
     if (!rafId) rafId = requestAnimationFrame(step);
   }
   function stop() { scrolling = false; paint(); }
-  function toggleScroll() { if (scrolling) stop(); else start(); }
+  function toggle() { if (scrolling) stop(); else start(); }
+  window.__stopScroll = stop;
+  btn.addEventListener("click", toggle);
+  document.addEventListener("keydown", function(e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var t = e.target || {};
+    if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable) return;
+    if (document.body.classList.contains("locked")) return;
+    if (document.body.classList.contains("tv")) return;
+    if (e.key === "s" || e.key === "S") { e.preventDefault(); toggle(); }
+  });
+  paint();
+})();
+
+(function tvMode() {
+  var ROTATE_MS = 15000, PAUSE_MS = 8000;
+  var paneIds = ["pane1", "pane2", "pane3", "pane4"];
+  var cur = 0, timer = null, pausedUntil = 0, manualPause = false;
+  var btn = document.getElementById("kioskBtn");
+  var ico = document.getElementById("kioskIco");
+  var label = document.getElementById("kioskLabel");
+  var hint = document.getElementById("kioskHint");
+  var MON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>';
+  ico.innerHTML = MON;
   function inFs() { return document.fullscreenElement || document.webkitFullscreenElement; }
+  function dots() {
+    var d = document.getElementById("paneDots"), h = "";
+    for (var i = 0; i < paneIds.length; i++) h += '<span class="' + (i === cur ? "on" : "") + '" data-i="' + i + '"></span>';
+    d.innerHTML = h;
+  }
+  function setActive(i) {
+    cur = i;
+    paneIds.forEach(function(id, idx) {
+      var el = document.getElementById(id);
+      if (el) el.classList.toggle("active", idx === cur);
+    });
+    dots();
+  }
+  function tick() { if (manualPause || Date.now() < pausedUntil) return; setActive((cur + 1) % paneIds.length); }
+  function hintPaint() {
+    if (document.body.classList.contains("tv")) hint.innerHTML = '<code class="kbd">F</code> \u00b7 <code class="kbd">Space</code> ' + (manualPause ? "resume" : "pause") + ' \u00b7 <code class="kbd">\u2190</code> <code class="kbd">\u2192</code> slides';
+    else hint.innerHTML = '<code class="kbd">F</code>';
+  }
+  function enterTv() {
+    if (window.__stopScroll) window.__stopScroll();
+    document.body.classList.add("tv");
+    setActive(0);
+    renderStrip();
+    if (!timer) timer = setInterval(tick, ROTATE_MS);
+    label.textContent = "Exit TV";
+    manualPause = false;
+    hintPaint();
+    btn.classList.add("on");
+    btn.setAttribute("aria-pressed", "true");
+  }
+  function exitTv() {
+    document.body.classList.remove("tv");
+    paneIds.forEach(function(id) { var el = document.getElementById(id); if (el) el.classList.remove("active"); });
+    if (timer) { clearInterval(timer); timer = null; }
+    label.textContent = "TV";
+    manualPause = false;
+    hintPaint();
+    btn.classList.remove("on");
+    btn.setAttribute("aria-pressed", "false");
+  }
   function enterFs() {
     var el = document.documentElement;
     if (el.requestFullscreen) el.requestFullscreen();
@@ -270,21 +706,26 @@ setInterval(load, 300000);
     if (document.exitFullscreen) document.exitFullscreen();
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
   }
-  btn.addEventListener("click", toggleScroll);
+  btn.addEventListener("click", function() { if (inFs()) exitFs(); else enterFs(); });
   document.addEventListener("keydown", function(e) {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     var t = e.target || {};
     if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable) return;
-    if (e.key === "f" || e.key === "F") {
-      e.preventDefault();
-      if (!inFs()) { enterFs(); start(); }
-      else { exitFs(); }
-    }
+    if (document.body.classList.contains("locked")) return;
+    if (e.key === "f" || e.key === "F") { e.preventDefault(); if (inFs()) exitFs(); else enterFs(); return; }
+    if (!document.body.classList.contains("tv")) return;
+    if (e.key === " " || e.code === "Space") { e.preventDefault(); manualPause = !manualPause; hintPaint(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); setActive((cur + 1) % paneIds.length); pausedUntil = Date.now() + PAUSE_MS; }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); setActive((cur - 1 + paneIds.length) % paneIds.length); pausedUntil = Date.now() + PAUSE_MS; }
   });
-  function onFsChange() { if (!inFs()) stop(); }
+  function onFsChange() { if (inFs()) enterTv(); else exitTv(); }
   document.addEventListener("fullscreenchange", onFsChange);
   document.addEventListener("webkitfullscreenchange", onFsChange);
-  paint();
+  document.addEventListener("mousemove", function() { if (document.body.classList.contains("tv")) pausedUntil = Date.now() + PAUSE_MS; });
+  document.getElementById("paneDots").addEventListener("click", function(e) {
+    var i = e.target && e.target.getAttribute ? e.target.getAttribute("data-i") : null;
+    if (i !== null) { setActive(parseInt(i, 10)); pausedUntil = Date.now() + PAUSE_MS; }
+  });
 })();
 </script>
 </body>
