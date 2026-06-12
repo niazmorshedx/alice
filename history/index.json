@@ -1,7 +1,0 @@
-{
-  "format": "bake-history-jsonl-v1",
-  "shards": [
-    "2026-06"
-  ],
-  "cadence_note": "one record per rebake/sweep; scores use the 2026-06-12 tuned formula across all records"
-}
