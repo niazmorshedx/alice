@@ -1,4 +1,4 @@
-# MyAlice — Release Status Dashboard
+# Alice — Release Status Dashboard
 
 A single-page, always-current view of where every MyAlice release stands — for leadership, GTM, and CS. Risk, on-time confidence, GTM/CS readiness, and rollout state, computed from live Jira data.
 
