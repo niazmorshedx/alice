@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Alice — Release Status</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #f7f6f3; --card: #ffffff; --border: #e6e3dc; --text: #1f1f1f;
+  --muted: #5f5e5a; --subtle: #9a9892; --accent: #c15f3c;
+  --red-bg: #fae7e2; --red-tx: #9c3015;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16150f; --card: #201f17; --border: #38362c; --text: #eae8e2;
+    --muted: #b5b3ab; --subtle: #7d7b73; --accent: #d97757;
+    --red-bg: #42201a; --red-tx: #f0a08c;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5; }
+#lock { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.lock-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 34px 38px; display: grid; gap: 12px; width: 340px; }
+.lock-title { font-size: 20px; font-weight: 800; }
+.lock-title span { color: var(--accent); }
+.lock-sub { font-size: 13px; color: var(--muted); }
+#lockInput { background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 10px 14px; color: var(--text); font-size: 14px; font-family: inherit; outline: none; }
+#lockInput:focus { border-color: var(--accent); }
+#lockBtn { background: var(--accent); color: #fff; border: none; border-radius: 9px; padding: 10px 14px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+#lockBtn:hover { filter: brightness(1.08); }
+#lockBtn[disabled] { opacity: .6; cursor: default; }
+.lock-err { display: none; font-size: 12px; color: var(--red-tx); background: var(--red-bg); border-radius: 8px; padding: 8px 12px; line-height: 1.45; word-break: break-word; }
+#app { display: contents; }
+body.locked #app { display: none; }
+</style>
+</head>
+<body class="locked">
+<div id="lock">
+  <div class="lock-card">
+    <div class="lock-title">Alice — <span>Release Status</span></div>
+    <div class="lock-sub">Enter the passkey to view this dashboard.</div>
+    <input type="password" id="lockInput" placeholder="Passkey" autocomplete="off" autofocus>
+    <button id="lockBtn" type="button">Unlock</button>
+    <div class="lock-err" id="lockErr">Wrong passkey — try again.</div>
+  </div>
+</div>
+<div id="app"></div>
+<script>
+(function () {
+  "use strict";
+  var GRACE_MS = 15 * 60 * 1000;
+  var HB_MS = 30 * 1000;
+  var KEY = null, META = null, booted = false;
+  var input = document.getElementById("lockInput");
+  var btn = document.getElementById("lockBtn");
+  var err = document.getElementById("lockErr");
+
+  function showErr(msg) { err.textContent = msg; err.style.display = "block"; }
+
+  function b64ToBuf(b64) { var bin = atob(b64), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+  function bufToB64(buf) { var u = new Uint8Array(buf), s = ""; for (var i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); }
+
+  function loadMeta() {
+    if (META) return Promise.resolve(META);
+    return fetch("crypto-meta.json?v=" + Date.now()).then(function (r) { if (!r.ok) throw new Error("crypto-meta.json HTTP " + r.status); return r.json(); }).then(function (m) { META = m; return m; });
+  }
+  function deriveKey(passkey) {
+    return loadMeta().then(function (m) {
+      return crypto.subtle.importKey("raw", new TextEncoder().encode(passkey), "PBKDF2", false, ["deriveKey"]).then(function (base) {
+        return crypto.subtle.deriveKey(
+          { name: "PBKDF2", salt: b64ToBuf(m.salt), iterations: m.iter, hash: "SHA-256" },
+          base, { name: "AES-GCM", length: 256 }, true, ["decrypt"]);
+      });
+    });
+  }
+  function importRawKey(rawB64) {
+    return crypto.subtle.importKey("raw", b64ToBuf(rawB64), { name: "AES-GCM" }, true, ["decrypt"]);
+  }
+  function decryptArtifact(name) {
+    return fetch(name + "?v=" + Date.now()).then(function (r) { if (!r.ok) throw new Error(name + " HTTP " + r.status); return r.json(); }).then(function (obj) {
+      return crypto.subtle.decrypt({ name: "AES-GCM", iv: b64ToBuf(obj.iv) }, KEY, b64ToBuf(obj.data));
+    }).then(function (pt) { return new TextDecoder().decode(pt); });
+  }
+
+  function stamp() { localStorage.setItem("rsd_t", String(Date.now())); }
+  function touch() { if (localStorage.getItem("rsd_k")) localStorage.setItem("rsd_t", String(Date.now())); }
+  function clearSession() { localStorage.removeItem("rsd_k"); localStorage.removeItem("rsd_t"); }
+  function persistKey() {
+    return crypto.subtle.exportKey("raw", KEY).then(function (raw) { localStorage.setItem("rsd_k", bufToB64(raw)); stamp(); });
+  }
+
+  function refresh() {
+    return Promise.all([decryptArtifact("data.enc"), decryptArtifact("signals.enc")]).then(function (out) {
+      var data = JSON.parse(out[0]), sig = JSON.parse(out[1]);
+      if (window.__rsdRender) window.__rsdRender(data);
+      if (window.__rsdRenderSignals) window.__rsdRenderSignals(sig);
+    }).catch(function (e) {
+      console.error("[rsd] data refresh failed:", e);
+      var el = document.getElementById("loadErr"); if (el) el.style.display = "block";
+    });
+  }
+
+  function boot() {
+    if (booted) return Promise.resolve();
+    booted = true;
+    console.log("[rsd] boot 1/5: decrypting app.enc");
+    return decryptArtifact("app.enc").then(function (txt) {
+      console.log("[rsd] boot 2/5: app.enc decrypted (" + txt.length + " chars), parsing bundle");
+      var bundle = JSON.parse(txt);
+      console.log("[rsd] boot 3/5: injecting css/html");
+      var st = document.createElement("style"); st.textContent = bundle.css; document.head.appendChild(st);
+      document.getElementById("app").innerHTML = bundle.html;
+      console.log("[rsd] boot 4/5: running dashboard js");
+      (new Function(bundle.js))();
+      console.log("[rsd] boot 5/5: dashboard js ran, fetching data");
+      return refresh();
+    }).then(function () {
+      console.log("[rsd] boot: complete");
+      setInterval(refresh, 300000);
+      setInterval(touch, HB_MS);
+      document.getElementById("lock").style.display = "none";
+      document.body.classList.remove("locked");
+    }).catch(function (e) { booted = false; console.error("[rsd] boot failed:", e); throw e; });
+  }
+
+  function attempt() {
+    var v = input.value; if (!v) return;
+    err.style.display = "none"; btn.disabled = true;
+    deriveKey(v).then(function (k) { KEY = k; return boot(); }).then(function () {
+      return persistKey();
+    }).catch(function (e) {
+      KEY = null; btn.disabled = false; booted = false;
+      console.error("[rsd] unlock failed:", e);
+      var isAuth = e && e.name === "OperationError";
+      showErr(isAuth ? "Wrong passkey — try again." : ("Error (" + (e && e.name || "?") + "): " + (e && e.message || String(e))));
+      input.value = ""; input.focus();
+    });
+  }
+
+  function showLogin() {
+    btn.addEventListener("click", attempt);
+    input.addEventListener("keydown", function (e) { if (e.key === "Enter") attempt(); });
+    input.focus();
+  }
+
+  function init() {
+    if (!window.crypto || !window.crypto.subtle) {
+      showErr("This browser blocks Web Crypto here — the page must be opened via http://localhost or https (not file:// or a raw IP).");
+      return;
+    }
+    var t = parseInt(localStorage.getItem("rsd_t") || "0", 10);
+    var kB64 = localStorage.getItem("rsd_k");
+    if (kB64 && (Date.now() - t) <= GRACE_MS) {
+      importRawKey(kB64).then(function (k) { KEY = k; stamp(); return boot(); })
+        .then(function () { /* unlocked from grace */ })
+        .catch(function (e) { console.error("[rsd] grace unlock failed:", e); clearSession(); showLogin(); });
+    } else {
+      clearSession();
+      showLogin();
+    }
+  }
+  init();
+})();
+</script>
+</body>
+</html>
