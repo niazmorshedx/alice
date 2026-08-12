@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Alice — Dashboards</title>
+<style>
+:root{color-scheme:light dark;--bg:#f7f6f3;--card:#ffffff;--border:#e6e3dc;--text:#1f1f1f;--muted:#5f5e5a;--subtle:#9a9892;--accent:#c15f3c;--chip:#f1efe9;--green:#1a7f5a;--green-bg:#e3f2ec;--green-tx:#115c40;--red-bg:#fae7e2;--red-tx:#9c3015;}
+@media (prefers-color-scheme:dark){:root{--bg:#16150f;--card:#201f17;--border:#38362c;--text:#eae8e2;--muted:#b5b3ab;--subtle:#7d7b73;--accent:#d97757;--chip:#2c2b22;--green:#3dbd8d;--green-bg:#1d3a2f;--green-tx:#7fdcb6;--red-bg:#42201a;--red-tx:#f0a08c;}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.55}
+#lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100}
+.lock-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:34px 38px;display:grid;gap:12px;width:340px}
+.lock-title{font-size:20px;font-weight:800}.lock-title span{color:var(--accent)}
+.lock-sub{font-size:13px;color:var(--muted)}
+#lockInput{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none}
+#lockInput:focus{border-color:var(--accent)}
+#lockBtn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+#lockBtn:hover{filter:brightness(1.08)}#lockBtn[disabled]{opacity:.6;cursor:default}
+.lock-err{display:none;font-size:12px;color:var(--red-tx);background:var(--red-bg);border-radius:8px;padding:8px 12px;line-height:1.45;word-break:break-word}
+#app{display:none}body.open #app{display:block}body.open #lock{display:none}
+.wrap{max-width:880px;margin:0 auto;padding:44px 20px 60px}
+.topbar{display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin-bottom:8px;flex-wrap:wrap}
+.ttl{font-size:28px;font-weight:800;letter-spacing:-.02em}.ttl span{color:var(--accent)}
+.sub{color:var(--muted);font-size:13.5px;margin-bottom:26px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.dcard{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:var(--text);transition:border-color .15s, transform .15s, box-shadow .15s}
+.dcard:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 26px rgba(30,25,15,.12)}
+.dcard .ic{width:42px;height:42px;border-radius:12px;background:var(--chip);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.dcard .ic svg{width:22px;height:22px}
+.dcard .nm{font-size:17px;font-weight:800}
+.dcard .ds{font-size:12.5px;color:var(--muted);flex:1}
+.dcard .ft{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:var(--subtle);border-top:1px solid var(--border);padding-top:10px}
+.dcard .baked{font-variant-numeric:tabular-nums}
+.dcard .go{color:var(--accent);font-weight:700}
+.footrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:30px;flex-wrap:wrap}
+.foot{color:var(--subtle);font-size:12px;line-height:1.6}
+#lockAll{background:none;border:1px solid var(--border);border-radius:9px;padding:7px 13px;color:var(--muted);font-size:12.5px;cursor:pointer;font-family:inherit;white-space:nowrap}
+#lockAll:hover{border-color:var(--accent);color:var(--text)}
+</style>
+</head>
+<body class="locked">
+<div id="lock"><div class="lock-card">
+  <div class="lock-title">Alice — <span>Dashboards</span></div>
+  <div class="lock-sub">Enter the passkey. One unlock opens every dashboard on this domain.</div>
+  <input type="password" id="lockInput" placeholder="Passkey" autocomplete="off" autofocus>
+  <button id="lockBtn" type="button">Unlock</button>
+  <div class="lock-err" id="lockErr">Wrong passkey — try again.</div>
+</div></div>
+<div id="app"><div class="wrap">
+  <div class="topbar"><div class="ttl">Alice <span>Dashboards</span></div></div>
+  <div class="sub">Leadership visibility surfaces — pick a dashboard. Your unlock is remembered on this device.</div>
+  <div class="cards" id="cards"></div>
+  <div class="footrow">
+    <div class="foot">Internal — do not share externally. Dashboards are client-encrypted; this hub covers the shared-passkey set.</div>
+    <button id="lockAll" type="button">Lock dashboards on this device</button>
+  </div>
+</div></div>
+<script>
+(function(){
+  "use strict";
+  var KEY=null, META=null;
+  var SK="alice_k", SV="alice_kv";
+  var ICONS={
+    rocket:'<path d="M4 13a8 8 0 0 1 7 7 6 6 0 0 0 3-5 9 9 0 0 0 6-8 3 3 0 0 0-3-3 9 9 0 0 0-8 6 6 6 0 0 0-5 3z"/><path d="M7 14a6 6 0 0 0-3 6 6 6 0 0 0 6-3"/><circle cx="15" cy="9" r="1"/>',
+    pulse:'<path d="M3 12h4l2 6 4-14 2 8h6"/>',
+    routing:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M12 19h4.5a3.5 3.5 0 0 0 0-7h-9a3.5 3.5 0 0 1 0-7H12"/>'
+  };
+  function icon(n){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[n]||ICONS.rocket)+"</svg>";}
+  var input=document.getElementById("lockInput"), btn=document.getElementById("lockBtn"), err=document.getElementById("lockErr");
+  function showErr(m){err.textContent=m;err.style.display="block";}
+  function b64ToBuf(b64){var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u;}
+  function bufToB64(buf){var u=new Uint8Array(buf),s="";for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s);}
+  function loadMeta(){if(META)return Promise.resolve(META);return fetch("crypto-meta.json?v="+Date.now()).then(function(r){if(!r.ok)throw new Error("crypto-meta.json HTTP "+r.status);return r.json();}).then(function(m){META=m;return m;});}
+  function deriveKey(p){return loadMeta().then(function(m){return crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveKey"]).then(function(base){return crypto.subtle.deriveKey({name:"PBKDF2",salt:b64ToBuf(m.salt),iterations:m.iter,hash:"SHA-256"},base,{name:"AES-GCM",length:256},true,["decrypt"]);});});}
+  function importRawKey(r){return crypto.subtle.importKey("raw",b64ToBuf(r),{name:"AES-GCM"},true,["decrypt"]);}
+  function clearSession(){try{localStorage.removeItem(SK);localStorage.removeItem(SV);localStorage.removeItem("rsd_k");localStorage.removeItem("rsd_t");localStorage.removeItem("ais_k");localStorage.removeItem("ais_t");}catch(e){}}
+  function persistKey(){return crypto.subtle.exportKey("raw",KEY).then(function(raw){try{localStorage.setItem(SK,bufToB64(raw));localStorage.setItem(SV,String(META&&META.kv||1));}catch(e){}});}
+  function ago(d){var s=(Date.now()-d.getTime())/1000;if(s<3600)return Math.max(1,Math.round(s/60))+"m ago";if(s<86400)return Math.round(s/3600)+"h ago";return Math.round(s/86400)+"d ago";}
+  function renderCards(hub){
+    var h="";
+    for(var i=0;i<hub.dashboards.length;i++){
+      var d=hub.dashboards[i];
+      h+='<a class="dcard" href="'+d.slug+'/"><div class="ic">'+icon(d.icon)+'</div><div class="nm">'+d.name+'</div><div class="ds">'+d.desc+'</div><div class="ft"><span class="baked" id="baked-'+d.slug+'">baked —</span><span class="go">Open &#8594;</span></div></a>';
+    }
+    document.getElementById("cards").innerHTML=h;
+    hub.dashboards.forEach(function(d){
+      fetch(d.slug+"/data.enc",{method:"HEAD"}).then(function(r){
+        var lm=r.headers.get("Last-Modified");
+        if(lm)document.getElementById("baked-"+d.slug).textContent="baked "+ago(new Date(lm));
+      }).catch(function(){});
+    });
+    document.body.classList.add("open");document.body.classList.remove("locked");
+  }
+  function boot(){return fetch("hub.enc?v="+Date.now()).then(function(r){if(!r.ok)throw new Error("hub.enc HTTP "+r.status);return r.json();}).then(function(o){return crypto.subtle.decrypt({name:"AES-GCM",iv:b64ToBuf(o.iv)},KEY,b64ToBuf(o.data));}).then(function(pt){renderCards(JSON.parse(new TextDecoder().decode(pt)));});}
+  function attempt(){var v=input.value;if(!v)return;err.style.display="none";btn.disabled=true;
+    deriveKey(v).then(function(k){KEY=k;return boot();}).then(function(){return persistKey();})
+    .catch(function(e){KEY=null;btn.disabled=false;var isAuth=e&&e.name==="OperationError";showErr(isAuth?"Wrong passkey — try again.":("Error ("+(e&&e.name||"?")+"): "+(e&&e.message||String(e))));input.value="";input.focus();});}
+  function showLogin(){btn.addEventListener("click",attempt);input.addEventListener("keydown",function(e){if(e.key==="Enter")attempt();});input.focus();}
+  document.getElementById("lockAll").addEventListener("click",function(){clearSession();location.reload();});
+  function init(){if(!window.crypto||!window.crypto.subtle){showErr("This browser blocks Web Crypto here — open via https.");return;}
+    loadMeta().then(function(m){
+      var kB64=null,kv=null;
+      try{kB64=localStorage.getItem(SK);kv=localStorage.getItem(SV);}catch(e){}
+      if(kB64&&kv===String(m.kv)){importRawKey(kB64).then(function(k){KEY=k;return boot();}).catch(function(e){console.error("[hub] session unlock failed:",e);try{localStorage.removeItem(SK);localStorage.removeItem(SV);}catch(x){}showLogin();});}
+      else{showLogin();}
+    }).catch(function(e){showErr("Error loading crypto-meta: "+(e&&e.message||String(e)));showLogin();});}
+  init();
+})();
+</script>
+</body>
+</html>
