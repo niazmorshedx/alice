@@ -79,7 +79,38 @@ body{font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,s
   function importRawKey(r){return crypto.subtle.importKey("raw",b64ToBuf(r),{name:"AES-GCM"},true,["decrypt"]);}
   function clearSession(){try{localStorage.removeItem(SK);localStorage.removeItem(SV);localStorage.removeItem("rsd_k");localStorage.removeItem("rsd_t");localStorage.removeItem("ais_k");localStorage.removeItem("ais_t");}catch(e){}}
   function persistKey(){return crypto.subtle.exportKey("raw",KEY).then(function(raw){try{localStorage.setItem(SK,bufToB64(raw));localStorage.setItem(SV,String(META&&META.kv||1));}catch(e){}});}
-  function ago(d){var s=(Date.now()-d.getTime())/1000;if(s<3600)return Math.max(1,Math.round(s/60))+"m ago";if(s<86400)return Math.round(s/3600)+"h ago";return Math.round(s/86400)+"d ago";}
+  // Day-granular: bakes run on a daily-or-slower cadence, so hour/minute precision implied
+  // a freshness the figure never had. Compares calendar days in LOCAL time.
+  function ago(d){
+    var a=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+    var t=new Date(); t=new Date(t.getFullYear(),t.getMonth(),t.getDate());
+    var n=Math.round((t-a)/86400000);
+    return n<=0?"today":(n===1?"yesterday":n+"d ago");
+  }
+  // Freshness is read from each dashboard's OWN baked generated_at, decrypted here with the
+  // shared key. It is deliberately NOT taken from the HTTP header: GitHub Pages rewrites every
+  // file on every deploy, so that header carries the SITE's last deploy time and reads
+  // identically for every card. Measured 2026-08-17 -- a changelog-only push made all five
+  // cards report "2m ago" while three had last been baked on 2026-08-13. A card that
+  // overstates freshness is worse than one showing nothing, so a failed read leaves the
+  // placeholder rather than guessing. Only shared-salt dashboards are readable this way;
+  // Aegis holds its own key and is deliberately not a hub card.
+  function bakedAt(slug){
+    return fetch(slug+"/data.enc?v="+Date.now(),{cache:"no-store"}).then(function(r){
+      if(!r.ok)throw new Error(slug+"/data.enc HTTP "+r.status);
+      return r.json();
+    }).then(function(o){
+      return crypto.subtle.decrypt({name:"AES-GCM",iv:b64ToBuf(o.iv)},KEY,b64ToBuf(o.data));
+    }).then(function(pt){
+      var g=JSON.parse(new TextDecoder().decode(pt)).generated_at;
+      if(!g)throw new Error(slug+": no generated_at in data.enc");
+      var t=String(g), d;
+      if(t.length===10){var q=t.split("-");d=new Date(+q[0],+q[1]-1,+q[2]);}
+      else{d=new Date(t);}
+      if(isNaN(d.getTime()))throw new Error(slug+": unparseable generated_at "+t);
+      return d;
+    });
+  }
   function renderCards(hub){
     var h="";
     for(var i=0;i<hub.dashboards.length;i++){
@@ -88,10 +119,14 @@ body{font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,s
     }
     document.getElementById("cards").innerHTML=h;
     hub.dashboards.forEach(function(d){
-      fetch(d.slug+"/data.enc",{method:"HEAD"}).then(function(r){
-        var lm=r.headers.get("Last-Modified");
-        if(lm)document.getElementById("baked-"+d.slug).textContent="baked "+ago(new Date(lm));
-      }).catch(function(){});
+      bakedAt(d.slug).then(function(dt){
+        var el=document.getElementById("baked-"+d.slug);
+        if(el)el.textContent="baked "+ago(dt);
+      }).catch(function(e){
+        console.error("[hub] freshness read failed for "+d.slug+":",e);
+        var el=document.getElementById("baked-"+d.slug);
+        if(el)el.textContent="baked \u2014";
+      });
     });
     document.body.classList.add("open");document.body.classList.remove("locked");
   }
