@@ -25,7 +25,7 @@ body{font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,s
 <body class="locked">
 <div id="lock"><div class="lock-card">
   <div class="lock-title">Alice — <span>Security & Vulnerabilities</span></div>
-  <div class="lock-sub">Enter the passkey to view this dashboard. One unlock covers every dashboard on this domain.</div>
+  <div class="lock-sub">This dashboard has its own passkey, separate from the other dashboards on this domain — the shared unlock does not cover it.</div>
   <input type="password" id="lockInput" placeholder="Passkey" autocomplete="off" autofocus>
   <button id="lockBtn" type="button">Unlock</button>
   <div class="lock-err" id="lockErr">Wrong passkey — try again.</div>
@@ -34,12 +34,14 @@ body{font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,s
 <script>
 (function(){
   "use strict";
-  // Shared-session loader: the derived AES key is cached device-wide under alice_k
-  // (+ alice_kv key version) and is valid for EVERY hub-covered dashboard, because
-  // the covered set packs with one stable shared KDF salt (hub-crypto.json).
-  // A kv mismatch or a failed decrypt clears the session and re-prompts.
+  // SEPARATE SESSION (2026-08-17): Aegis sits deliberately OUTSIDE the shared-passkey hub
+  // set, because it carries unredacted vulnerability findings. Its derived key caches under
+  // aegis_k / aegis_kv, never the shared hub key, so unlocking the hub does not open this page
+  // and unlocking this page does not widen the shared session.
+  // This loader touches ONLY its own two keys -- it must never clear a sibling dashboard's
+  // session (invariant: changelog/assets/rebake-instructions.md -> no_cross_dashboard_key_clear).
   var KEY=null, META=null, booted=false;
-  var SK="alice_k", SV="alice_kv";
+  var SK="aegis_k", SV="aegis_kv";
   var input=document.getElementById("lockInput"), btn=document.getElementById("lockBtn"), err=document.getElementById("lockErr");
   function showErr(m){err.textContent=m;err.style.display="block";}
   function b64ToBuf(b64){var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u;}
